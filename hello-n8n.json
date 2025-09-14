@@ -1,0 +1,64 @@
+{
+  "name": "hello-n8n",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -128
+      ],
+      "id": "dd40d33b-6dde-4f94-a747-a7dd08035f11",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c7238227-b31b-4969-bf4f-8ba07565fbf7",
+              "name": "message",
+              "value": "Hello from n8n ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -592,
+        -128
+      ],
+      "id": "a52a6854-7b0f-4da9-97f5-c030c986c4dd",
+      "name": "Set node"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fe01042c-3ea3-4ad1-906c-69737787f372",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20537df166fe986e748cb0cf458c9ab9f2452752d2dddfaf0ff764cf9c918599"
+  },
+  "id": "SHmgdces5DcSlFzy",
+  "tags": []
+}
