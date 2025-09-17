@@ -1,0 +1,178 @@
+{
+  "name": "Sheets → LLM → Docs Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1Sj027H1VWFIgYmlqtdHqYPGFWc-LuDjKpHX46J9UVBY",
+          "mode": "list",
+          "cachedResultName": "slack sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sj027H1VWFIgYmlqtdHqYPGFWc-LuDjKpHX46J9UVBY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sj027H1VWFIgYmlqtdHqYPGFWc-LuDjKpHX46J9UVBY/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -80
+      ],
+      "id": "ff936258-256b-4ad1-ba77-1b9da1e1a189",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "bdjBlKq2C9ojwKO6",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "name, skill",
+        "include": "={{ $json.name }}{{ $json.skill }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -80
+      ],
+      "id": "4f832f07-1e7d-4e81-9c4b-dc02632c4889",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a professional summary for{{ $json.name }} \nwho has the following skills: \n{{ $json.skill }}\n",
+        "options": {
+          "systemMessage": "=\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -80
+      ],
+      "id": "bcdf7c85-838d-4a40-a589-69c455bc0fb7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxRetries": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        128
+      ],
+      "id": "a4926469-f352-4752-871b-8c556d1231da",
+      "name": "Cohere Chat Model",
+      "credentials": {
+        "cohereApi": {
+          "id": "QxBS51Jg1HYzJ8Jg",
+          "name": "Chatbot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": "=myDrive",
+        "folderId": "1UMgwKQ7v9QF-c9LtQeb4PvLfHNbB3IlK",
+        "title": "=Candidate Summary- {{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -80
+      ],
+      "id": "65b19631-6619-4568-aad8-7b7d0355ebd9",
+      "name": "Candidate Summary",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "8yIFyMTNkgSmqZjG",
+          "name": "Google Docs account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Candidate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6286efc2-b7ba-448c-8ea0-1d910ec897bd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20537df166fe986e748cb0cf458c9ab9f2452752d2dddfaf0ff764cf9c918599"
+  },
+  "id": "TS037bFkIOjmEEf6",
+  "tags": []
+}

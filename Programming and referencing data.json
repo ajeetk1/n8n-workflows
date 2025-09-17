@@ -1,0 +1,101 @@
+{
+  "name": "Programming and referencing data",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -80
+      ],
+      "id": "60090937-ae19-4546-95e4-12d2a07af291",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "url": "http://api.quotable.io/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "a73f28bd-7bac-4b0f-92d9-b5cec28c3858",
+      "name": "Random Quote"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b05368d0-8626-4013-b132-bc872363f959",
+              "name": "message ",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "34eadc77-159f-4a87-9ea9-71fd1cbbf896",
+              "name": "author",
+              "value": "={{ $json.author }}",
+              "type": "string"
+            },
+            {
+              "id": "4e7bc5f0-33c1-4a0c-96c6-8596fd4b71fe",
+              "name": "date",
+              "value": "={{ $json.dateAdded }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -80
+      ],
+      "id": "b4661508-e576-4f67-afc8-0d2033ac8daf",
+      "name": "results"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Random Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Quote": {
+      "main": [
+        [
+          {
+            "node": "results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f017d4a7-978d-4a8e-9263-48eb376d2471",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20537df166fe986e748cb0cf458c9ab9f2452752d2dddfaf0ff764cf9c918599"
+  },
+  "id": "NJ209WvFx93Am45U",
+  "tags": []
+}
