@@ -1,0 +1,279 @@
+{
+  "name": "SEO Audit Report Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        -352
+      ],
+      "id": "9ac1ee16-0aee-46b4-a7ec-ac50fd587370",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "path": "ebf79659-8977-4dea-9b81-9c883ed595e4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1232,
+        -48
+      ],
+      "id": "212f3f1a-c489-44b2-b0bd-93a62bb17d1c",
+      "name": "Webhook",
+      "webhookId": "ebf79659-8977-4dea-9b81-9c883ed595e4"
+    },
+    {
+      "parameters": {
+        "url": "https://www.seozast.com/",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"url\":\"https://www.seozast.com/\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -992,
+        -176
+      ],
+      "id": "dc181f4e-7ad4-4bef-8bfe-646fce04b847",
+      "name": "Run SEO Audit",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $json[\"data\"] || $json[\"body\"] || \"\";  // depending on n8n version\nconst results = {};\n\ntry {\n  // Extract Title\n  const titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n  results.title = titleMatch ? titleMatch[1].trim() : \"No title found\";\n\n  // Extract Meta Description\n  const metaDescMatch = html.match(/<meta\\s+name=[\"']description[\"']\\s+content=[\"']([^\"']+)[\"']/i);\n  results.metaDescription = metaDescMatch ? metaDescMatch[1].trim() : \"No meta description found\";\n\n  // Extract H1 Tags\n  const h1Matches = [...html.matchAll(/<h1[^>]*>(.*?)<\\/h1>/gi)];\n  results.h1Tags = h1Matches.map(m => m[1].trim());\n\n  // Count Links\n  const links = [...html.matchAll(/<a\\s+[^>]*href=[\"']([^\"']+)[\"']/gi)];\n  results.totalLinks = links.length;\n\n  // Count Images + missing alt attributes\n  const images = [...html.matchAll(/<img\\s+[^>]*>/gi)];\n  results.totalImages = images.length;\n  const missingAlt = images.filter(img => !/alt=[\"'][^\"']*[\"']/i.test(img[0]));\n  results.imagesMissingAlt = missingAlt.length;\n\n} catch (err) {\n  results.error = \"Error parsing HTML: \" + err.message;\n}\n\nreturn [{ json: results }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        -176
+      ],
+      "id": "1102e708-c478-419e-a215-2559412deee4",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an SEO expert. Analyze the following website data and write a clear, client-friendly SEO audit report.\n\nData:\nTitle: {{ $json.title }}\nMeta Description: {{ $json.metaDescription }}\nH1 Tags: {{ $json.h1Tags }}\nTotal Links: {{ $json.totalLinks }}\nTotal Images: {{ $json.totalImages }}\nImages Missing Alt: {{ $json.imagesMissingAlt }}\n\nReport should include:\n1) Summary of findings\n2) Strengths of the site \n3) Weaknesses/issues\n4) Actionable recommendations \n5) Rate website based on SEO ",
+        "options": {
+          "systemMessage": ""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        -176
+      ],
+      "id": "b01f80b1-e8d6-4f9f-abe1-27b1b00e37c1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        32
+      ],
+      "id": "7087adbb-0f26-4244-ac1d-3575598c9e22",
+      "name": "Cohere Chat Model",
+      "credentials": {
+        "cohereApi": {
+          "id": "QxBS51Jg1HYzJ8Jg",
+          "name": "Chatbot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -176
+      ],
+      "id": "01a1f402-e7cc-4c02-8d0f-ee0be593e178",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -176
+      ],
+      "id": "3aa352f9-dcdd-4ace-a79a-3bdbfd9480c8",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200,
+          "responseKey": "Webhook says “Got it, we’ll email the report soon."
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "750058b8-07e8-49ea-be5b-6dcba67d56c0",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sendTo": "kcareena3@gmail.com",
+        "subject": "SEO Audit Report",
+        "emailType": "text",
+        "message": "={{ $json.data[0].output }}",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        -176
+      ],
+      "id": "1d74837a-6a0a-44b5-9877-eb611a2c4bb2",
+      "name": "Send a message",
+      "webhookId": "d07f19cc-8745-4daf-8cdd-eb4d999c8522",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VAeVdCFMxt6d9IbI",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Run SEO Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Run SEO Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run SEO Audit": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6d4e0add-6ed2-44a0-8562-655f1546be9b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20537df166fe986e748cb0cf458c9ab9f2452752d2dddfaf0ff764cf9c918599"
+  },
+  "id": "qFILFfwxODCeQX2W",
+  "tags": []
+}
